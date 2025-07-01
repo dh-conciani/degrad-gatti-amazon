@@ -2,8 +2,13 @@
 // dhemerson.costa@ipam.org.br
 
 // read mapbiomas secondary vegetation
-var degrad = ee.Image('projects/mapbiomas-workspace/DEGRADACAO/COLECAO/BETA/PROCESS/edge_area/edge_120m_col9_v1')
-  .gt(0)
+var degrad = ee.Image('projects/mapbiomas-workspace/DEGRADACAO/COLECAO/BETA/PROCESS/edge_area/edge_age_120m_col9_v1')
+  .divide(100)
+  .round()
+  .eq(1)
+  .selfMask()
+  
+  //Map.addLayer(degrad.select(37).randomVisualizer())
 
 // define years
 var years = [1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 
@@ -77,7 +82,7 @@ var calculateArea = function (image, territory, geometry) {
 // perform per year 
 var areas = years.map(
     function (year) {
-        var image = asset_i.select('edge_120m_' + year);
+        var image = asset_i.select('edge_age_120m_' + year);
         var areas = calculateArea(image, territory, geometry);
         // set additional properties
         areas = areas.map(
@@ -93,7 +98,7 @@ areas = ee.FeatureCollection(areas).flatten();
   
 Export.table.toDrive({
     collection: areas,
-    description: 'degrad-grid-v1',
+    description: 'degrad-grid-v4',
     folder: driverFolder,
     fileFormat: 'CSV'
 });
