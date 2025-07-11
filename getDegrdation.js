@@ -1,14 +1,36 @@
 // compute secondary vegetation and deforestation by cerrado ecoregion
 // dhemerson.costa@ipam.org.br
 
-// read mapbiomas secondary vegetation
+// read mapbiomas degradation
 var degrad = ee.Image('projects/mapbiomas-workspace/DEGRADACAO/COLECAO/BETA/PROCESS/edge_area/edge_age_120m_col9_v1')
-  .divide(100)
-  .round()
-  .eq(1)
-  .selfMask()
+  //.divide(100)
+  //.round()
+  .eq(103) // reatin forest edges 1 yr old (new edges)
+  .selfMask();
   
-  //Map.addLayer(degrad.select(37).randomVisualizer())
+Map.addLayer(degrad.select(38).randomVisualizer(), {}, 'edge')
+  
+var fire = ee.Image('projects/mapbiomas-public/assets/brazil/fire/collection4/mapbiomas_fire_collection4_annual_burned_coverage_v1')
+  .eq(3)
+  .selfMask();
+  
+Map.addLayer(fire.select(38), {}, 'fire')
+
+// Get the list of band names
+var bandNames = fire.bandNames();
+
+// Remove the last band
+var bandsWithoutLast = bandNames.slice(0, bandNames.length().subtract(1));
+
+// Select the remaining bands to create a new image
+var fire = fire.select(bandsWithoutLast);
+
+
+var x = degrad.blend(fire)
+Map.addLayer(x.select(38), {}, 'blend')
+
+  
+// 
 
 // define years
 var years = [1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 
@@ -98,7 +120,7 @@ areas = ee.FeatureCollection(areas).flatten();
   
 Export.table.toDrive({
     collection: areas,
-    description: 'degrad-grid-v4',
+    description: 'degrad-grid-v5',
     folder: driverFolder,
     fileFormat: 'CSV'
 });
