@@ -66,7 +66,7 @@ var asset_i = recipe.selfMask();
 var pixelArea = ee.Image.pixelArea().divide(10000);
 
 // Geometry to export
-var geometry = asset_i.geometry();
+var geometry = collection.geometry();
 
 // convert a complex object to a simple feature collection 
 var convert2table = function (obj) {
